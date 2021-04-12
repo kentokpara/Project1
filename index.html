@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>CAPSTONE PROJECT</title>
+	</head>
+	<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/three.min.js"></script>
+	<script src="https://unpkg.com/three@0.85.0/examples/js/controls/OrbitControls.js"></script>
+	<script src="https://stemkoski.github.io/Three.js/js/THREEx.KeyboardState.js"></script>
+	<script src="https://stemkoski.github.io/Three.js/js/Detector.js"></script>
+	<script src="https://unpkg.com/three@0.126.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+// Call Our Global Variables
+var kb={};
+var keyboard = {};
+var width = 44;
+var height = 12;
+var flat;
+var countT,countR,countL = false;
+var countS = false;
+var amb;
+var WallColor = "#613d44"
+var scene;
+
+var renderer = new THREE.WebGLRenderer({antialias : true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+renderer.shadowMap.enabled = true;
+
+// load a texture, for Background
+const textureB = new THREE.TextureLoader().load( "texture/back.jpg" );
+textureB.wrapS = THREE.RepeatWrapping;
+textureB.wrapT = THREE.RepeatWrapping;
+textureB.repeat.set( 1, 1 );
+
+//Scene
+scene = new THREE.Scene();
+scene.background = textureB;
+var pcam = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 20000);
+pcam.position.set(0, 100, 1500);
+pcam.lookAt(scene.position);
+scene.add(pcam)
+
+//light attributes
+const colorT = 'white';
+const colorR = 'red';
+const colorL = 'white';
+const colorS = 'white';
+const intensity = 1;
+var amb = new THREE.AmbientLight('white',0.5);
+const lightT = new THREE.SpotLight(colorT, intensity);
+const lightR = new THREE.SpotLight(colorR, intensity);
+const lightL = new THREE.SpotLight(colorL, intensity);
+const lightS = new THREE.SpotLight(colorS, intensity);
+//Enable Shadow
+lightS.castShadow = true;
+lightL.castShadow = true;
+lightR.castShadow = true;
+lightT.castShadow = true;
+//Enable Light Helper
+const helperT = new THREE.PointLightHelper(lightT, 5);
+const helperR = new THREE.PointLightHelper(lightR, 5);
+const helperL = new THREE.PointLightHelper(lightL, 5);
+const helperS = new THREE.PointLightHelper(lightS, 5);
+//Set Light Position
+lightT.position.set(-400, 150, 400);
+lightT.target.position.set(-300,0,0);
+
+lightR.position.set(250,100,100)
+lightR.target.position.set(250,10,100)
+
+lightS.position.set(-10,100,450)
+lightS.target.position.set(300,0,-300)
+
+lightL.position.set(-100,140,-470);
+lightL.target.position.set(-200,-40,-400);
+//Add Lights to the scene
+scene.add(lightL.target);
+scene.add(lightT);
+scene.add(lightT.target);
+scene.add(lightR);
+scene.add(lightR.target)
+scene.add(lightL);
+scene.add(amb);
+scene.add(helperT);
+scene.add(helperR);
+scene.add(helperL);
+scene.add(lightS);
+scene.add(helperS);
+scene.add(lightS.target)
+
+//Set Import textures for polygons.
+
+// load a texture, for wall1
+const texture = new THREE.TextureLoader().load( "texture/brick.jpg" );
+texture.wrapS = THREE.RepeatWrapping;
+texture.wrapT = THREE.RepeatWrapping;
+texture.repeat.set( 8, 1 );
+
+// load a texture, Globe
+const textureG = new THREE.TextureLoader().load( "texture/globe.jfif" );
+textureG.wrapS = THREE.RepeatWrapping;
+textureG.wrapT = THREE.RepeatWrapping;
+textureG.repeat.set( 1, 1 );
+
+// load a texture, wall2
+const texture1 = new THREE.TextureLoader().load( "texture/white.jpg" );
+texture1.wrapS = THREE.RepeatWrapping;
+texture1.wrapT = THREE.RepeatWrapping;
+texture1.repeat.set( 8, 1 );
+
+// load a texture,Roof
+const texture2 = new THREE.TextureLoader().load( "texture/tilesnew.jpg" );
+texture2.wrapS = THREE.RepeatWrapping;
+texture2.wrapT = THREE.RepeatWrapping;
+texture2.repeat.set( 6, 6 );
+
+// load a texture, Door
+const texture3 = new THREE.TextureLoader().load( "texture/door5.png" );
+texture3.wrapS = THREE.RepeatWrapping;
+texture3.wrapT = THREE.RepeatWrapping;
+//texture3.repeat.set( 6, 6 );
+
+// load a texture,Painting1
+const texture4 = new THREE.TextureLoader().load( "texture/oil4.jpg" );
+texture4.wrapS = THREE.RepeatWrapping;
+texture4.wrapT = THREE.RepeatWrapping;
+//texture3.repeat.set( 6, 6 );
+
+// load a texture, Painting2
+const texture5 = new THREE.TextureLoader().load( "texture/oil1.jpg" );
+texture5.wrapS = THREE.RepeatWrapping;
+texture5.wrapT = THREE.RepeatWrapping;
+//texture3.repeat.set( 6, 6 );
+
+// load a texture,Painting3
+const texture6 = new THREE.TextureLoader().load( "texture/oil2.jpg" );
+texture6.wrapS = THREE.RepeatWrapping;
+texture6.wrapT = THREE.RepeatWrapping;
+//texture3.repeat.set( 6, 6 );
+
+// load a texture, Painting4
+const texture7 = new THREE.TextureLoader().load( "texture/oil3.jpg" );
+texture7.wrapS = THREE.RepeatWrapping;
+texture7.wrapT = THREE.RepeatWrapping;
+//texture3.repeat.set( 6, 6 );
+
+// load a texture, Dividing Wall
+const texture8 = new THREE.TextureLoader().load( "texture/stone.jpg" );
+texture8.wrapS = THREE.RepeatWrapping;
+texture8.wrapT = THREE.RepeatWrapping;
+texture8.repeat.set( 8, 4 );
+
+// load a texture, Wooden Bench
+const texture9 = new THREE.TextureLoader().load( "texture/wood.jpg" );
+texture9.wrapS = THREE.RepeatWrapping;
+texture9.wrapT = THREE.RepeatWrapping;
+texture9.repeat.set( 2, 1 );
+
+// load a texture, Floor
+const texture10 = new THREE.TextureLoader().load( "texture/tile.jfif" );
+texture10.wrapS = THREE.RepeatWrapping;
+texture10.wrapT = THREE.RepeatWrapping;
+texture10.repeat.set( 8, 2 );
+
+
+
+//Image 1
+var image1 = new THREE.Mesh(new THREE.PlaneGeometry(100, 100,100,), new THREE.MeshPhongMaterial({
+	map:texture3,side: THREE.DoubleSide
+}));
+image1.castShadow = true;
+image1.receiveShadow = true;
+image1.position.set(-391.5,50,500)
+image1.scale.set(1.8,2.0,1.8)
+//plane.rotation.x = -Math.PI * 0.5;
+scene.add(image1);
+
+//Image 2
+var image2 = new THREE.Mesh(new THREE.PlaneGeometry(120, 100,100,), new THREE.MeshPhongMaterial({
+	map:texture4,side: THREE.DoubleSide
+}));
+image2.castShadow = true;
+image2.receiveShadow = true;
+image2.position.set(-360,70,-475)
+image2.scale.set(1.8,1.3,1.5)
+//plane.rotation.x = -Math.PI * 0.5;
+scene.add(image2);
+
+//Image 3
+var image3 = new THREE.Mesh(new THREE.PlaneGeometry(120, 100,100,), new THREE.MeshPhongMaterial({
+	map:texture5,side: THREE.DoubleSide
+}));
+image3.rotation.y = 3.14159/2;
+image3.castShadow = true;
+image3.receiveShadow = true;
+image3.position.set(-475,60,-100)
+image3.scale.set(2,1.3,2)
+//plane.rotation.x = -Math.PI * 0.5;
+scene.add(image3);
+
+//Image 4
+var image4 = new THREE.Mesh(new THREE.PlaneGeometry(150, 100,100,), new THREE.MeshPhongMaterial({
+	map:texture6,side: THREE.DoubleSide
+}));
+image4.rotation.y = 3.14159/2;
+image4.castShadow = true;
+image4.receiveShadow = true;
+image4.position.set(475,60,0)
+image4.scale.set(2,1.3,2)
+//plane.rotation.x = -Math.PI * 0.5;
+scene.add(image4);
+
+//Image 5
+var image5 = new THREE.Mesh(new THREE.PlaneGeometry(150, 100,100,), new THREE.MeshPhongMaterial({
+	map:texture7,side: THREE.DoubleSide
+}));
+image5.castShadow = true;
+image5.receiveShadow = true;
+image5.position.set(250,60,475)
+image5.scale.set(2,1.3,2)
+//plane.rotation.x = -Math.PI * 0.5;
+scene.add(image5);
+
+
+//3D TEXT
+var fontLoader = new THREE.FontLoader();
+fontLoader.load("https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_bold.typeface.json",function(tex){ 
+var  textGeo = new THREE.TextGeometry('LIFE IS ART', {size: 20,height: 10,curveSegments: 12,font: tex,
+    });
+    var  textMaterial = new THREE.MeshPhongMaterial({ color:'purple' });
+    var  text = new THREE.Mesh(textGeo , textMaterial);
+	text.position.set(-30,30,300)
+	text.castShadow = true;
+	text.receiveShadow = true
+	text.rotation.y = 3.14159/2;
+    scene.add(text);
+})
+
+//Globe
+var spheregeo = new THREE.SphereGeometry(40,200,200)
+var sphereMat = new THREE.MeshPhongMaterial({map:textureG})
+var globe = new THREE.Mesh(spheregeo,sphereMat)
+globe.position.set(250,10,100)
+scene.add(globe)
+
+//Globe-Base
+var baseGeo= new THREE.BoxGeometry( 100, 20, 100 );
+var baseMat = new THREE.MeshPhongMaterial( {map: texture9} );
+var base = new THREE.Mesh( baseGeo, baseMat );
+base.position.set(250,-40,100)
+scene.add( base );
+
+//Grouping for Hierachy 
+var group1 = new THREE.Object3D()
+group1.add(globe)
+group1.add(base)
+group1.position.set(0,0,0)
+scene.add(group1)
+//bench
+var mesh = new THREE.Mesh(
+new THREE.BoxGeometry(100,30,30),
+new THREE.MeshPhongMaterial({map:texture9, flatShading : flat})
+	);
+mesh.castShadow = true;
+mesh.receiveShadow = true;
+mesh.position.set(200,-10,-430)
+mesh.scale.set(2,2,2)
+scene.add(mesh);
+
+//Grouund Floor
+var plane = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 10, 10), new THREE.MeshPhongMaterial({
+	map:texture2,side: THREE.DoubleSide
+}));
+plane.castShadow = true;
+plane.receiveShadow = true;
+plane.position.y = -50
+plane.rotation.x = -Math.PI * 0.5;
+scene.add(plane);
+
+//Roof
+var plane2 = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000, 10, 10), new THREE.MeshPhongMaterial({
+	map:texture10,side: THREE.DoubleSide
+}));
+plane2.castShadow = true;
+plane2.receiveShadow = true;
+plane2.position.y = 150
+plane2.rotation.x = -Math.PI * 0.5;
+scene.add(plane2);
+
+var wallGeometry = new THREE.BoxGeometry( 800, 200, 20, 1, 1, 1 );
+var wallMaterial = new THREE.MeshPhongMaterial( {map:texture, wireframe:false } );
+//var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );	
+var wall = new THREE.Mesh(wallGeometry, wallMaterial);
+wall.position.set(100, 50, 490);
+wall.castShadow = true;
+wall.receiveShadow = true;
+scene.add(wall);
+//collidableMeshList.push(wall);
+var wallGeometry2 = new THREE.BoxGeometry( 1000, 200, 20, 1, 1, 1 );
+var wallMaterial2 = new THREE.MeshPhongMaterial( {map:texture1, wireframe:false } );
+var wall2 = new THREE.Mesh(wallGeometry2, wallMaterial2);
+wall2.position.set(490,50,0)
+wall2.rotation.y = 3.14159/2;
+wall2.castShadow = true;
+wall2.receiveShadow = true;
+scene.add(wall2)
+
+//Dividing Wall
+var wallGeometry5 = new THREE.BoxGeometry( 800, 200, 20, 1, 1, 1 );
+var wallMaterial5 = new THREE.MeshPhongMaterial( {map:texture8, wireframe:false } );
+var wall5 = new THREE.Mesh(wallGeometry5, wallMaterial5);
+wall5.position.set(-50,50,80)
+wall5.rotation.y = 3.14159/2;
+wall5.castShadow = true;
+wall5.receiveShadow = true;
+scene.add(wall5)
+
+var wallGeometry3 = new THREE.BoxGeometry( 1000, 200, 20, 1, 1, 1 );
+var wallMaterial3 = new THREE.MeshPhongMaterial( {map:texture1, wireframe:false } );
+var wall3 = new THREE.Mesh(wallGeometry3, wallMaterial3);
+wall3.position.set(-490,50,0)
+wall3.rotation.y = 3.14159/2;
+wall3.castShadow = true;
+wall3.receiveShadow = true;
+scene.add(wall3)
+
+var wallGeometry4 = new THREE.BoxGeometry( 1000, 200, 20, 1, 1, 1 );
+var wallMaterial4 = new THREE.MeshPhongMaterial( {map:texture, wireframe:false } );
+//var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );	
+var wall4 = new THREE.Mesh(wallGeometry4, wallMaterial4);
+wall4.position.set(0, 50, -490);
+wall4.castShadow = true;
+wall4.receiveShadow = true;
+scene.add(wall4);
+//Models
+let loader = new THREE.GLTFLoader();
+loader.load('https://threejsfundamentals.org/threejs/resources/models/cartoon_lowpoly_small_city_free_pack/scene.gltf', function(gltf){
+var car = gltf.scene;
+car.scale.set(0.05,0.05,0.05);
+car.position.set(-300,50,200)
+car.castShadow = true;
+car.receiveShadow = true;
+scene.add(car);
+});
+
+var stand1 = new THREE.BoxGeometry( 10, 90, 10, 1, 1, 1 );
+var standMat1 = new THREE.MeshPhongMaterial( {color:WallColor, wireframe:false } );
+//var wireMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, wireframe:true } );	
+var standa = new THREE.Mesh(stand1, standMat1);
+standa.position.set(-320, -10, 200);
+standa.castShadow = true;
+standa.receiveShadow = true;
+scene.add(standa); 
+
+//Clock Settings for Loop
+var clock = new THREE.Clock();
+var time = 0;
+var delta = 0.008; // seconds.
+var moveDistance = 200 * delta; // 200 pixels per second
+var rotateAngle = Math.PI / 2 * delta;   // pi/2 radians (90 degrees) per second
+
+//Greeting
+const listener = new THREE.AudioListener();
+pcam.add( listener );
+
+// create a global audio source
+const sound = new THREE.Audio( listener );
+
+// load a sound and set it as the Audio object's buffer
+const audioLoader = new THREE.AudioLoader();
+audioLoader.load( 'others/music.wav', function( buffer ) {
+	sound.setBuffer( buffer );
+	sound.setVolume( 0.5 );
+	sound.setLoop( true );
+});
+
+render()
+
+
+// CONTROLS
+var controls = new THREE.OrbitControls( pcam, renderer.domElement );
+
+function render() {
+//Welcome Z
+if(pcam.position.z < 490 ){
+	sound.play();
+	sound.setLoop( true );
+	soundc = 1500
+	if (pcam.position.z < -490){
+		sound.stop();
+	}
+}
+//CAMERA MOVEMENTS
+	if(keyboard[87]){ // W key
+		
+		pcam.translateZ(-moveDistance);
+		//keyboard[87] = false;
+
+	}
+	if(keyboard[83]){ // S key
+		
+		pcam.translateZ(moveDistance);
+		//keyboard[83] = false;
+
+	}
+	if(keyboard[81]){ // Q key
+		
+		pcam.translateX(-moveDistance);
+		//keyboard[81] = false;
+
+	}
+	if(keyboard[69]){ // E key
+		
+		pcam.translateX(moveDistance);
+		//keyboard[69] = false;
+
+	}
+	if(keyboard[65]){ // A key
+		// Redirect motion by 90 degrees
+		
+		pcam.rotateOnAxis(new THREE.Vector3(0,1,0), rotateAngle)
+		//keyboard[65] = false;
+
+	}
+	if(keyboard[68]){ // D key
+		
+		pcam.rotateOnAxis(new THREE.Vector3(0,1,0), -rotateAngle)
+		//keyboard[68] = false;
+
+		
+	}
+	if(keyboard[82]){ // R key
+		// Redirect motion by 90 degrees
+		
+		pcam.rotateOnAxis(new THREE.Vector3(1,0,0), rotateAngle)
+		//keyboard[82] = false;
+
+	}
+	if(keyboard[70]){ // F key
+		
+		pcam.rotateOnAxis(new THREE.Vector3(1,0,0), -rotateAngle)
+		//keyboard[70] = false;
+
+		
+	}
+	//Reset Camera
+	if(keyboard[90]){ // Z key
+		
+		pcam.position.set(0, 100, 1500);
+		pcam.lookAt(scene.position);
+		sound.stop();
+		
+	}
+	//Translations
+	//Globe
+	if(keyboard[53]){ // 5 key
+		globe.rotateOnAxis(new THREE.Vector3(0,1,0), -0.009)
+	}
+
+	//Base
+	if(keyboard[54]){ // 6 key
+		base.rotateOnAxis(new THREE.Vector3(0,1,0), 0.009)
+	}
+
+	//Globe + Base
+	if(keyboard[55]){ // 7 key
+		globe.rotateOnAxis(new THREE.Vector3(0,1,0), -0.009)
+		base.rotateOnAxis(new THREE.Vector3(0,1,0), 0.009)
+	}
+
+	//Light Translation
+	if(kb[56]){ // 8 key
+		lightR.position.x += Math.cos(Date.now() / 360);
+		//lightR.color = '#f7bd08'
+		//lightR.position.y += -5 * Math.cos(Date.now() / 360);
+		//lightR.position.z += -5 * Math.cos(Date.now() / 360);
+	}
+//Light Controls
+	function lightPosition() {
+	
+	if (keyboard[49]){// 1
+		
+		if(countT){
+		lightT.visible = true;
+		countT = false;
+		}else{
+			lightT.visible = false;
+			countT = true;
+		}
+		
+		keyboard[49] = false
+
+
+	}
+
+	if (keyboard[50]){// 2
+		if(countL){
+		lightS.visible = true;
+		countL = false;
+		}else{
+			lightS.visible = false;
+			countL= true;
+		}
+		
+		keyboard[50] = false
+
+	}
+
+	if (keyboard[51]){// 3
+		if(countR){
+		lightR.visible = true;
+		countR = false;
+		}else{
+			lightR.visible = false;
+			countR = true;
+		}
+		
+		keyboard[51] = false
+
+	}
+
+	if (keyboard[52]){// 4
+		if(countS){
+		lightL.visible = true;
+		countS = false;
+		}else{
+			lightL.visible = false;
+			countS = true;
+		}
+		
+		keyboard[52] = false
+
+	}
+	}
+	
+	lightPosition()
+  requestAnimationFrame(render);
+  renderer.render( scene, pcam );
+
+  function keyDown(event){
+	keyboard[event.keyCode] = true;
+	kb[event.keyCode] = true;
+}
+
+function keyUp(event){
+	keyboard[event.keyCode] = false;
+	kb[event.keyCode] = true;
+}
+
+window.addEventListener('keydown', keyDown);
+window.addEventListener('keyup', keyUp);
+}
+
+</script>
+	</body>
+</html>
